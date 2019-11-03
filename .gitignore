@@ -1,2 +1,5 @@
 .idea
 target/
+#class and log files
+*.class
+*.log
