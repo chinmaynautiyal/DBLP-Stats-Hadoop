@@ -8,7 +8,7 @@ import dblpStats.XmlInputFormatMultipleTags
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
-import mappers.{authorStatsMapper, authorshipScoreMapper, dblpMapper, stratifyStatsMapper}
+import mappers.{authorStatsMapper, authorshipScoreMapper, dblpMapper, stratifyAuthorStatsMapper, stratifyStatsMapper}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.{FloatWritable, IntWritable, Text}
@@ -89,8 +89,8 @@ object driverMapReduce extends LazyLogging {
           //this is the stratification job
           //get year, journal name and conference
           job.setMapperClass(classOf[stratifyStatsMapper])
-          job.setCombinerClass(classOf[stratifyStatsReducer])
-          job.setReducerClass(classOf[stratifyStatsReducer])
+          job.setCombinerClass(classOf[dblpReducer])
+          job.setReducerClass(classOf[dblpReducer])
 
 
           job.setOutputFormatClass(classOf[TextOutputFormat[Text, IntWritable]])
@@ -131,16 +131,26 @@ object driverMapReduce extends LazyLogging {
           job.setOutputValueClass(classOf[Text])
         case 5 =>
           //stratifying max median job
-          job.setMapperClass(classOf[authorStatsMapper])
-          job.setCombinerClass(classOf[dblpReducer])
-          job.setReducerClass(classOf[dblpReducer])
+          job.setMapperClass(classOf[stratifyAuthorStatsMapper])
+          job.setReducerClass(classOf[authorStatsReducer])
 
-          job.setOutputFormatClass(classOf[TextOutputFormat[Text, IntWritable]])
+          //set one reducer
+          job.setNumReduceTasks(1)
+
+
+          //setting mapper output
+          job.setMapOutputKeyClass(classOf[Text])
+          job.setMapOutputValueClass(classOf[IntWritable])
+
+
+          job.setOutputFormatClass(classOf[TextOutputFormat[Text, Text]])
           job.setOutputKeyClass(classOf[Text])
-          job.setOutputValueClass(classOf[IntWritable])
+          job.setOutputValueClass(classOf[Text])
 
-        case _=>
-          print("unconfigured job")
+
+
+        case _ =>
+          logger.info("unconfigured job")
 
 
       }

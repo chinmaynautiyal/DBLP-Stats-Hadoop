@@ -24,4 +24,14 @@ class jobConfig (i: Config){
     i.getStringList("year")
   }.asScala.toList
 
+  def getStratificationFieldList(): List[String] = {
+
+    i.getStringList("stratificationF")
+    }.asScala.toList
+
+  def getConferenceList(): List[String] = {
+
+    i.getStringList("conferences")
+    }.asScala.toList
+
 }
